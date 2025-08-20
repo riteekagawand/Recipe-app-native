@@ -1,40 +1,29 @@
 import { gql } from "graphql-tag";
 
 const recipeTypeDefs = gql`
+  type User {
+    _id: ID!
+    name: String!
+    email: String!
+  }
+
   type Recipe {
-    id: ID!
+    _id: ID!
     title: String!
     ingredients: [String!]!
-    steps: [String!]!
-    category: String!
-    image: String
-    notes: [String]
+    instructions: String!
+    user: User!
+    createdAt: String!
+    updatedAt: String!
   }
 
   type Query {
-    getRecipes: [Recipe!]!
-    getRecipe(id: ID!): Recipe
+    recipes: [Recipe!]!
+    recipe(id: ID!): Recipe
   }
 
   type Mutation {
-    createRecipe(
-      title: String!
-      ingredients: [String!]!
-      steps: [String!]!
-      category: String!
-      image: String
-    ): Recipe!
-
-    updateRecipe(
-      id: ID!
-      title: String
-      ingredients: [String!]
-      steps: [String!]
-      category: String
-      image: String
-    ): Recipe!
-
-    deleteRecipe(id: ID!): Boolean!
+    createRecipe(title: String!, ingredients: [String!]!, instructions: String!): Recipe!
   }
 `;
 

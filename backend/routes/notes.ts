@@ -1,28 +1,41 @@
-import express from "express";
+//routes/notes
+import { Router, Request, Response } from "express";
 import Note from "../models/Note";
+import { authMiddleware } from "../middleware/auth";
 
-const router = express.Router();
+const router = Router();
 
-// Get all notes for a recipe
-router.get("/:recipeId", async (req, res) => {
-  const notes = await Note.find({ recipe: req.params.recipeId })
-    .populate("user", "username email"); // only show username & email
-  res.json(notes);
-});
-
-// Add a note
-router.post("/:recipeId", async (req, res) => {
+// Create Note
+router.post("/", authMiddleware, async (req: Request, res: Response) => {
   try {
-    const note = new Note({
-      content: req.body.content,
-      recipe: req.params.recipeId,
-      user: req.body.userId, // should come from JWT, not raw body in real app
-    });
+    const { title, content } = req.body;
+    const userId = (req as any).userId; // injected by middleware
+
+    const note = new Note({ title, content, user: userId }); // attach user
     await note.save();
+
     res.status(201).json(note);
-  } catch (err) {
-    res.status(400).json({ error: "Failed to add note" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to create note" });
   }
 });
+
+
+
+// Get all notes (for logged-in user)
+router.get("/", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    // Fetch notes for the logged-in user and populate the 'user' field
+    const notes = await Note.find({ user: req.userId }).populate("user", "name email"); 
+
+    res.json(notes);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch notes" });
+  }
+});
+
+
 
 export default router;

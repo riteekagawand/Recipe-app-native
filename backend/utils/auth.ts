@@ -8,3 +8,12 @@ export const generateToken = (user: IUser): string => {
     { expiresIn: "7d" }
   );
 };
+
+// ✅ new helper to verify token
+export const verifyToken = (token: string): { id: string; email: string } | null => {
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET as string) as { id: string; email: string };
+  } catch {
+    return null;
+  }
+};

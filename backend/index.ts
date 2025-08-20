@@ -2,19 +2,30 @@ import express, { Request } from "express";
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
-import connectDB from "./config/db"; // your MongoDB connection
-import typeDefs from "./graphql/typeDefs/userTypeDefs"; // your GraphQL typeDefs
-import resolvers from "./graphql/resolvers/userResolvers"; // your GraphQL resolvers
+import connectDB from "./config/db"; // MongoDB connection
 import jwt from "jsonwebtoken";
-import "dotenv/config"; // automatically loads .env
-import notesRoutes from "./routes/notes"; // your notes routes
+import "dotenv/config";
+import notesRoutes from "./routes/notes"; // REST notes routes
+import { authMiddleware } from "./middleware/auth";
 
-// Define context type
+// GraphQL typeDefs & resolvers
+import userTypeDefs from "./graphql/typeDefs/userTypeDefs";
+import userResolvers from "./graphql/resolvers/userResolvers";
+import recipeTypeDefs from "./graphql/typeDefs/recipeTypeDefs";
+import recipeResolvers from "./graphql/resolvers/recipeResolvers";
+
+// Merge typeDefs & resolvers
+import { mergeTypeDefs, mergeResolvers } from "@graphql-tools/merge";
+
+const typeDefs = mergeTypeDefs([userTypeDefs, recipeTypeDefs]);
+const resolvers = mergeResolvers([userResolvers, recipeResolvers]);
+
+// Define GraphQL context type
 interface Context {
   userId?: string;
 }
 
-// Helper to get user ID from token
+// Helper to get user ID from JWT
 const getUserIdFromToken = (req: Request): string | undefined => {
   const authHeader = req.headers.authorization;
   if (!authHeader) return undefined;
@@ -23,7 +34,7 @@ const getUserIdFromToken = (req: Request): string | undefined => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as any;
     return decoded.id;
-  } catch (err) {
+  } catch {
     return undefined;
   }
 };
@@ -34,33 +45,35 @@ async function main() {
 
   const app = express();
 
-  app.use("/api/notes", express.json(), notesRoutes);
+  // Parse JSON bodies BEFORE routes
+  app.use(express.json());
 
-  // Create Apollo Server
+  // REST Notes routes with auth
+  app.use("/api/notes", authMiddleware, notesRoutes);
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-  introspection: true,
-});
-
+  // Apollo Server for Users + Recipes
+  const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    introspection: true,
+  });
   await server.start();
 
-  // Middlewares
+  // GraphQL endpoint
   app.use(
     "/graphql",
     cors(),
-    express.json(), // parse JSON
+    express.json(),
     expressMiddleware(server, {
-      context: async ({ req }: { req: Request }): Promise<Context> => ({
+      context: async ({ req }): Promise<Context> => ({
         userId: getUserIdFromToken(req),
       }),
     })
   );
 
-  app.listen(4000, () => {
-    console.log("🚀 Server ready at http://localhost:4000/graphql");
-  });
+  app.listen(4000, () =>
+    console.log("🚀 Server running at http://localhost:4000/graphql")
+  );
 }
 
 main().catch((err) => console.error(err));

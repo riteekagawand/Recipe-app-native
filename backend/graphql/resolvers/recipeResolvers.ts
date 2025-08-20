@@ -1,24 +1,38 @@
 import Recipe from "../../models/Recipe";
+import User from "../../models/User";
+
+interface Context {
+  userId?: string;
+}
 
 const recipeResolvers = {
   Query: {
-    getRecipes: async () => await Recipe.find(),
-    getRecipe: async (_: any, { id }: { id: string }) => await Recipe.findById(id),
+    recipes: async () => {
+      return await Recipe.find().populate("user", "name email");
+    },
+    recipe: async (_: any, { id }: { id: string }) => {
+      return await Recipe.findById(id).populate("user", "name email");
+    },
   },
   Mutation: {
-    createRecipe: async (_: any, args: any, context: any) => {
-      if (!context.userId) throw new Error("Unauthorized");
-      const recipe = new Recipe({ ...args });
-      return await recipe.save();
-    },
-    updateRecipe: async (_: any, { id, ...updates }: any, context: any) => {
-      if (!context.userId) throw new Error("Unauthorized");
-      return await Recipe.findByIdAndUpdate(id, updates, { new: true });
-    },
-    deleteRecipe: async (_: any, { id }: { id: string }, context: any) => {
-      if (!context.userId) throw new Error("Unauthorized");
-      await Recipe.findByIdAndDelete(id);
-      return true;
+    createRecipe: async (
+      _: any,
+      { title, ingredients, instructions }: { title: string; ingredients: string[]; instructions: string },
+      context: Context
+    ) => {
+      if (!context.userId) {
+        throw new Error("Unauthorized");
+      }
+
+      const recipe = new Recipe({
+        title,
+        ingredients,
+        instructions,
+        user: context.userId,
+      });
+
+      await recipe.save();
+      return recipe.populate("user", "name email");
     },
   },
 };
