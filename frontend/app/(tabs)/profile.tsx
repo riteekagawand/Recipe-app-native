@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { ScrollView, Pressable } from "react-native";
 import { YStack, Text, Card, Image, XStack, Button } from "tamagui";
 import { useQuery, useMutation, gql } from "@apollo/client";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { Clock } from "@tamagui/lucide-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Query to fetch all recipes
+// ================= GraphQL =================
 const GET_RECIPES = gql`
   query GetRecipes {
     recipes {
@@ -22,7 +22,6 @@ const GET_RECIPES = gql`
   }
 `;
 
-// Mutation to delete a recipe
 const DELETE_RECIPE = gql`
   mutation DeleteRecipe($id: ID!) {
     deleteRecipe(id: $id) {
@@ -32,12 +31,11 @@ const DELETE_RECIPE = gql`
 `;
 
 export default function ProfileScreen() {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   const { loading, error, data } = useQuery(GET_RECIPES);
 
-  // Optimistic delete mutation
   const [deleteRecipe] = useMutation(DELETE_RECIPE, {
     update: (cache, { data }) => {
       if (!data) return;
@@ -52,7 +50,7 @@ export default function ProfileScreen() {
     },
   });
 
-  // Decode JWT from AsyncStorage
+  // Get user ID from token
   useEffect(() => {
     const getUserIdFromToken = async () => {
       const token = await AsyncStorage.getItem("token");
@@ -101,7 +99,6 @@ export default function ProfileScreen() {
       </YStack>
     );
 
-  // Filter recipes for current user
   const myRecipes = data.recipes.filter(
     (recipe: any) => recipe.user?._id?.toString() === currentUserId
   );
@@ -129,11 +126,7 @@ export default function ProfileScreen() {
             borderRadius="$8"
             overflow="hidden"
           >
-            <Pressable
-              onPress={() =>
-                navigation.navigate("RecipeDetails", { id: recipe._id })
-              }
-            >
+            <Pressable onPress={() => router.push(`/recipe/${recipe._id}`)}>
               <Image
                 source={{ uri: recipe.image || "https://via.placeholder.com/150" }}
                 height={120}
@@ -156,9 +149,7 @@ export default function ProfileScreen() {
             <XStack padding="$3" space="$2">
               <Button
                 size="$3"
-                onPress={() =>
-                  navigation.navigate("EditRecipe", { id: recipe._id })
-                }
+                onPress={() => router.push(`/recipe/edit/${recipe._id}`)}
               >
                 Edit
               </Button>

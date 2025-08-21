@@ -44,7 +44,9 @@ export default function RecipeList() {
   if (loading) {
     return (
       <YStack flex={1} justifyContent="center" alignItems="center">
-        <Text fontSize="$6" color="$gray10">Loading recipes...</Text>
+        <Text fontSize="$6" color="$gray10">
+          Loading recipes...
+        </Text>
       </YStack>
     );
   }
@@ -58,7 +60,10 @@ export default function RecipeList() {
   }
 
   // Extract unique categories dynamically
-  const categories = ["All", ...Array.from(new Set(data.recipes.map((r: any) => r.category)))];
+  const categories: string[] = [
+    "All",
+    ...Array.from(new Set(data.recipes.map((r: any) => r.category))),
+  ];
 
   // Filter recipes by category
   let filteredRecipes =
@@ -75,38 +80,52 @@ export default function RecipeList() {
 
   // Sort by newest
   const sortedRecipes = [...filteredRecipes].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   );
 
   const recentRecipes = sortedRecipes.slice(0, 3);
-  const featuredRecipes = sortedRecipes.filter((r) => !recentRecipes.includes(r)).slice(0, 3);
-  const displayFeatured = featuredRecipes.length > 0 ? featuredRecipes : sortedRecipes.slice(0, 3);
+  const featuredRecipes = sortedRecipes
+    .filter((r) => !recentRecipes.includes(r))
+    .slice(0, 3);
+  const displayFeatured =
+    featuredRecipes.length > 0 ? featuredRecipes : sortedRecipes.slice(0, 3);
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       {/* Header */}
       <XStack justifyContent="space-between" alignItems="center" marginBottom="$5">
         <YStack>
-          <Text fontSize="$8" fontWeight="800">Hello Jega</Text>
-          <Text color="$gray10" fontSize="$4">What are you cooking today?</Text>
+          <Text fontSize="$8" fontWeight="800">
+            Hello Riteeka
+          </Text>
+          <Text color="$gray10" fontSize="$4">
+            What are you cooking today?
+          </Text>
         </YStack>
         <Avatar circular size="$6" borderWidth={1} borderColor="$green10">
-          <Avatar.Image src="https://i.pravatar.cc/150?img=32" />
+          <Avatar.Image src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJ7lagLLrZGlqk-4IDT1RogDDGDgeophD2Gg&s" />
           <Avatar.Fallback backgroundColor="gray" />
         </Avatar>
       </XStack>
 
       {/* Search */}
-      <XStack alignItems="center" space="$2" marginBottom="$4">
+      <XStack
+        alignItems="center"
+        borderRadius="$8"
+        backgroundColor="$gray2"
+        paddingHorizontal="$3"
+        marginBottom="$4"
+        space="$2"
+      >
+        <Search size={18} color="gray" />
         <Input
           flex={1}
           placeholder="Search recipes..."
-          icon={<Search size={16} />}
-          borderRadius="$8"
-          paddingHorizontal="$3"
-          backgroundColor="$gray2"
+          borderWidth={0}
+          backgroundColor="transparent"
           value={searchTerm}
-          onChangeText={setSearchTerm}
+          onChangeText={(text: string) => setSearchTerm(text)}
         />
         <Button icon={Filter} size="$3" theme="green" borderRadius="$8" />
       </XStack>
@@ -114,11 +133,13 @@ export default function RecipeList() {
       {/* Categories */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <XStack space="$2" marginBottom="$6">
-          {categories.map((cat) => (
+          {categories.map((cat: string) => (
             <Button
               key={cat}
               size="$3"
-              backgroundColor={activeCategory === cat ? "#10B980" : "#d4f7dc"} // active green, inactive light green
+              backgroundColor={
+                activeCategory === cat ? "#10B980" : "#d4f7dc"
+              }
               color={activeCategory === cat ? "white" : "$gray10"}
               borderRadius="$8"
               onPress={() => setActiveCategory(cat)}
@@ -130,7 +151,9 @@ export default function RecipeList() {
       </ScrollView>
 
       {/* Featured Recipes */}
-      <Text fontSize="$6" fontWeight="700" marginBottom="$3">Featured Recipes</Text>
+      <Text fontSize="$6" fontWeight="700" marginBottom="$3">
+        Featured Recipes
+      </Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <XStack space="$3">
           {displayFeatured.map((item: any) => (
@@ -138,7 +161,13 @@ export default function RecipeList() {
               key={item._id}
               onPress={() => router.push(`/recipe/${item._id}`)}
             >
-              <Card width={200} elevate bordered borderRadius="$8" overflow="hidden">
+              <Card
+                width={200}
+                elevate
+                bordered
+                borderRadius="$8"
+                overflow="hidden"
+              >
                 <Image source={{ uri: item.image }} height={120} width="100%" />
                 <YStack padding="$3" space="$2">
                   <Text fontSize="$5" fontWeight="700" numberOfLines={1}>
@@ -146,7 +175,9 @@ export default function RecipeList() {
                   </Text>
                   <XStack alignItems="center" space="$2">
                     <Clock size={14} color="gray" />
-                    <Text color="$gray10" fontSize="$3">15 mins</Text>
+                    <Text color="$gray10" fontSize="$3">
+                      15 mins
+                    </Text>
                   </XStack>
                 </YStack>
               </Card>
@@ -157,7 +188,9 @@ export default function RecipeList() {
 
       {/* New Recipes */}
       <YStack marginTop="$7">
-        <Text fontSize="$6" fontWeight="700" marginBottom="$3">New Recipes</Text>
+        <Text fontSize="$6" fontWeight="700" marginBottom="$3">
+          New Recipes
+        </Text>
         <XStack flexWrap="wrap" gap={12} justifyContent="flex-start">
           {recentRecipes.map((item: any) => (
             <Pressable
@@ -165,7 +198,13 @@ export default function RecipeList() {
               onPress={() => router.push(`/recipe/${item._id}`)}
               style={{ width: "48%" }}
             >
-              <Card elevate bordered borderRadius="$8" overflow="hidden" marginBottom="$4">
+              <Card
+                elevate
+                bordered
+                borderRadius="$8"
+                overflow="hidden"
+                marginBottom="$4"
+              >
                 <Image source={{ uri: item.image }} height={100} width="100%" />
                 <YStack padding="$2" space="$1">
                   <Text fontSize="$5" fontWeight="600" numberOfLines={1}>
@@ -173,7 +212,9 @@ export default function RecipeList() {
                   </Text>
                   <XStack alignItems="center" space="$2">
                     <Avatar size="$2" circular>
-                      <Avatar.Image src={`https://i.pravatar.cc/150?u=${item.user?._id}`} />
+                      <Avatar.Image
+                        src={`https://i.pravatar.cc/150?u=${item.user?._id}`}
+                      />
                       <Avatar.Fallback backgroundColor="gray" />
                     </Avatar>
                     <Text color="$gray10" fontSize="$3">

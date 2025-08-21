@@ -1,15 +1,7 @@
 import React, { useState } from "react";
-import {
-  View,
-  TextInput,
-  Button,
-  FlatList,
-  Text,
-  ActivityIndicator,
-} from "react-native";
-import { YStack } from "tamagui";
-
-const GEMINI_API_KEY = "AIzaSyCfpAgam0ZIE1GNZDJFFjC2rie-xKfatzk"; // ⚠️ replace with your key
+import { TextInput, Button, FlatList, ActivityIndicator } from "react-native";
+import { YStack, XStack, View, Text } from "tamagui";
+import { GEMINI_API_KEY } from "@env"; // ✅ load from .env
 
 export default function AiChatScreen() {
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
@@ -18,6 +10,7 @@ export default function AiChatScreen() {
 
   const sendMessage = async () => {
     if (!input.trim()) return;
+
     const userMessage = { role: "user", text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
@@ -36,26 +29,20 @@ export default function AiChatScreen() {
       );
 
       const data = await res.json();
-      console.log("Gemini response:", data);
-
       const aiResponse =
-        data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "⚠️ Sorry, no response.";
+        data?.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Sorry, no response.";
 
       setMessages((prev) => [...prev, { role: "ai", text: aiResponse }]);
     } catch (error) {
       console.error("Gemini error:", error);
-      setMessages((prev) => [
-        ...prev,
-        { role: "ai", text: "❌ Error talking to AI" },
-      ]);
+      setMessages((prev) => [...prev, { role: "ai", text: "❌ Error talking to AI" }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <YStack flex={1} padding={16}>
+    <YStack flex={1} padding={16} backgroundColor="white">
       <FlatList
         data={messages}
         keyExtractor={(_, index) => index.toString()}
@@ -63,16 +50,14 @@ export default function AiChatScreen() {
           <View
             style={{
               alignSelf: item.role === "user" ? "flex-end" : "flex-start",
-              backgroundColor: item.role === "user" ? "#007AFF" : "#EEE",
+              backgroundColor: item.role === "user" ? "#10B981" : "#E5E7EB",
               padding: 10,
-              borderRadius: 10,
+              borderRadius: 12,
               marginVertical: 4,
               maxWidth: "80%",
             }}
           >
-            <Text style={{ color: item.role === "user" ? "white" : "black" }}>
-              {item.text}
-            </Text>
+            <Text color={item.role === "user" ? "white" : "black"}>{item.text}</Text>
           </View>
         )}
       />
@@ -81,7 +66,7 @@ export default function AiChatScreen() {
         <ActivityIndicator size="small" color="gray" style={{ marginVertical: 8 }} />
       )}
 
-      <View style={{ flexDirection: "row", marginTop: 10 }}>
+      <XStack marginTop={10} alignItems="center">
         <TextInput
           value={input}
           onChangeText={setInput}
@@ -89,13 +74,14 @@ export default function AiChatScreen() {
           style={{
             flex: 1,
             borderWidth: 1,
-            borderColor: "#CCC",
+            borderColor: "#D1D5DB",
             borderRadius: 8,
             padding: 10,
+            marginRight: 8,
           }}
         />
         <Button title="Send" onPress={sendMessage} />
-      </View>
+      </XStack>
     </YStack>
   );
 }

@@ -3,7 +3,16 @@ import { ScrollView, SafeAreaView, TextInput, Alert } from "react-native";
 import { YStack, XStack, Text, Button, Image, Card, Theme } from "tamagui";
 import { gql, useMutation } from "@apollo/client";
 import * as ImagePicker from "expo-image-picker";
-import { Plus, Camera, Utensils, FileText, List, Bookmark, StickyNote } from "@tamagui/lucide-icons";
+import { router } from "expo-router";
+import {
+  Plus,
+  Camera,
+  Utensils,
+  FileText,
+  List,
+  Bookmark,
+  StickyNote,
+} from "@tamagui/lucide-icons";
 
 // ================= GraphQL =================
 const ADD_RECIPE = gql`
@@ -34,7 +43,14 @@ const ADD_RECIPE = gql`
 `;
 
 // ================= Reusable Input Component =================
-function FormInput({ icon, placeholder, value, onChangeText, multiline = false, rightButton }: any) {
+function FormInput({
+  icon,
+  placeholder,
+  value,
+  onChangeText,
+  multiline = false,
+  rightButton,
+}: any) {
   const [isFocused, setIsFocused] = useState(false);
   return (
     <XStack
@@ -58,7 +74,13 @@ function FormInput({ icon, placeholder, value, onChangeText, multiline = false, 
         multiline={multiline}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        style={{ flex: 1, marginLeft: 10, fontSize: 16, color: "#111827", paddingVertical: multiline ? 10 : 0 }}
+        style={{
+          flex: 1,
+          marginLeft: 10,
+          fontSize: 16,
+          color: "#111827",
+          paddingVertical: multiline ? 10 : 0,
+        }}
         placeholderTextColor="#9CA3AF"
         underlineColorAndroid="transparent"
         blurOnSubmit
@@ -80,9 +102,14 @@ export default function AddRecipeScreen() {
   const [noteInput, setNoteInput] = useState("");
 
   const [addRecipe, { loading }] = useMutation(ADD_RECIPE, {
-    onCompleted: () => {
-      Alert.alert("✅ Success", "Recipe added successfully!");
+    onCompleted: (data) => {
+      Alert.alert(
+        "✅ Success",
+        `Recipe "${data.createRecipe.title}" added successfully!`
+      );
       resetForm();
+      // Navigate to the recipe detail page
+      router.push(`/recipe/${data.createRecipe._id}`);
     },
     onError: (err) => Alert.alert("❌ Error", err.message),
   });
@@ -121,7 +148,8 @@ export default function AddRecipeScreen() {
   };
 
   const removeChip = (type: "ingredient" | "note", index: number) => {
-    if (type === "ingredient") setIngredients(ingredients.filter((_, i) => i !== index));
+    if (type === "ingredient")
+      setIngredients(ingredients.filter((_, i) => i !== index));
     if (type === "note") setNotes(notes.filter((_, i) => i !== index));
   };
 
@@ -152,34 +180,68 @@ export default function AddRecipeScreen() {
     <Theme name="light">
       <SafeAreaView style={{ flex: 1, backgroundColor: "#F9FAFB" }}>
         <ScrollView contentContainerStyle={{ padding: 20 }}>
-          <Card padding="$5" borderRadius="$8" backgroundColor="white" elevation={5}>
+          <Card
+            padding="$5"
+            borderRadius="$8"
+            backgroundColor="white"
+            elevation={5}
+          >
             <YStack space="$5" alignContent="center">
               {/* Image Picker */}
               <YStack alignItems="center" space="$2">
                 {image ? (
                   <Image
                     source={{ uri: image }}
-                    style={{ width: 120, height: 120, borderRadius: 60, marginBottom: 10 }}
+                    style={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: 60,
+                      marginBottom: 10,
+                    }}
                   />
                 ) : (
-                  <YStack width={120} height={120} borderRadius={60} backgroundColor="#F3F4F6" justifyContent="center" alignItems="center">
+                  <YStack
+                    width={120}
+                    height={120}
+                    borderRadius={60}
+                    backgroundColor="#F3F4F6"
+                    justifyContent="center"
+                    alignItems="center"
+                  >
                     <Plus size={32} color="#6B7280" />
                   </YStack>
                 )}
-                <Button size="$3" backgroundColor="#10B981" borderRadius={25} onPress={pickImage} icon={Camera}>
+                <Button
+                  size="$3"
+                  backgroundColor="#10B981"
+                  borderRadius={25}
+                  onPress={pickImage}
+                  icon={Camera}
+                >
                   Upload Image
                 </Button>
               </YStack>
 
               {/* Title */}
-              <FormInput icon={<Utensils size={20} color="#6B7280" />} placeholder="Recipe Title" value={title} onChangeText={setTitle} />
+              <FormInput
+                icon={<Utensils size={20} color="#6B7280" />}
+                placeholder="Recipe Title"
+                value={title}
+                onChangeText={setTitle}
+              />
 
               {/* Ingredients */}
               <YStack width="100%" space="$2">
                 <Text fontWeight="600">Ingredients</Text>
                 <XStack space="$2" flexWrap="wrap">
                   {ingredients.map((ing, i) => (
-                    <Button key={i} size="$2" backgroundColor="$green6" borderRadius={20} onPress={() => removeChip("ingredient", i)}>
+                    <Button
+                      key={i}
+                      size="$2"
+                      backgroundColor="$green6"
+                      borderRadius={20}
+                      onPress={() => removeChip("ingredient", i)}
+                    >
                       {ing} ✕
                     </Button>
                   ))}
@@ -190,7 +252,12 @@ export default function AddRecipeScreen() {
                   value={ingredientInput}
                   onChangeText={setIngredientInput}
                   rightButton={
-                    <Button size="$2" circular backgroundColor="#10B981" onPress={() => addChip("ingredient")}>
+                    <Button
+                      size="$2"
+                      circular
+                      backgroundColor="#10B981"
+                      onPress={() => addChip("ingredient")}
+                    >
                       <Plus size={16} color="white" />
                     </Button>
                   }
@@ -198,17 +265,34 @@ export default function AddRecipeScreen() {
               </YStack>
 
               {/* Instructions */}
-              <FormInput icon={<FileText size={20} color="#6B7280" />} placeholder="Instructions" value={instructions} onChangeText={setInstructions} multiline />
+              <FormInput
+                icon={<FileText size={20} color="#6B7280" />}
+                placeholder="Instructions"
+                value={instructions}
+                onChangeText={setInstructions}
+                multiline
+              />
 
               {/* Category */}
-              <FormInput icon={<Bookmark size={20} color="#6B7280" />} placeholder="Category (optional)" value={category} onChangeText={setCategory} />
+              <FormInput
+                icon={<Bookmark size={20} color="#6B7280" />}
+                placeholder="Category (optional)"
+                value={category}
+                onChangeText={setCategory}
+              />
 
               {/* Notes */}
               <YStack width="100%" space="$2">
                 <Text fontWeight="600">Notes</Text>
                 <XStack space="$2" flexWrap="wrap">
                   {notes.map((note, i) => (
-                    <Button key={i} size="$2" backgroundColor="$blue6" borderRadius={20} onPress={() => removeChip("note", i)}>
+                    <Button
+                      key={i}
+                      size="$2"
+                      backgroundColor="$blue6"
+                      borderRadius={20}
+                      onPress={() => removeChip("note", i)}
+                    >
                       {note} ✕
                     </Button>
                   ))}
@@ -219,7 +303,12 @@ export default function AddRecipeScreen() {
                   value={noteInput}
                   onChangeText={setNoteInput}
                   rightButton={
-                    <Button size="$2" circular backgroundColor="#3B82F6" onPress={() => addChip("note")}>
+                    <Button
+                      size="$2"
+                      circular
+                      backgroundColor="#3B82F6"
+                      onPress={() => addChip("note")}
+                    >
                       <Plus size={16} color="white" />
                     </Button>
                   }

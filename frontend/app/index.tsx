@@ -13,22 +13,15 @@ export default function Index() {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        // Add a small delay so splash is visible
-        setTimeout(() => {
-          // Ensure router is ready
-          if (!router) return;
-
-          if (token) {
-            router.replace("/(tabs)"); // Go to main app
-          } else {
-            router.replace("/login"); // Go to login
-          }
-
-          setLoading(false);
-        }, 800);
+        if (token) {
+          router.replace("/(tabs)/home"); // Go to main app immediately
+        } else {
+          router.replace("/login"); // Go to login immediately
+        }
       } catch (error) {
         console.error("Error checking token:", error);
-        if (router) router.replace("/login");
+        router.replace("/login");
+      } finally {
         setLoading(false);
       }
     };
@@ -37,7 +30,7 @@ export default function Index() {
   }, [router]);
 
   if (loading) {
-    return <Splash />; // Show splash screen while checking
+    return <Splash />; // Splash shows only while loading
   }
 
   return null;

@@ -39,7 +39,7 @@ export default function RootLayout() {
               <Stack.Screen name="recipe/[id]" options={{ title: "Recipe Details" }} />
               <Stack.Screen name="profile" options={{ title: "Profile Details" }} />
               <Stack.Screen name="categories" options={{ title: "Recipe Categories" }} />
-              <Stack.Screen name="category/[category]" options={{ title: "Recipes by Category" }} />
+              <Stack.Screen name="category/[id]" options={{ title: "Recipes by Category" }} />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="dark" />

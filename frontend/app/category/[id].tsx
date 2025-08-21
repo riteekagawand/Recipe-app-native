@@ -22,18 +22,20 @@ const GET_RECIPES_BY_CATEGORY = gql`
 `;
 
 export default function CategoryRecipesScreen() {
-  const { category } = useLocalSearchParams(); // ✅ must match [category].tsx
+  const { id } = useLocalSearchParams(); // ✅ must match [id].tsx
   const { loading, error, data } = useQuery(GET_RECIPES_BY_CATEGORY);
 
   if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
-  const recipes = data.recipes.filter((r: any) => r.category === category);
+  const recipes = data.recipes.filter(
+    (r: any) => r.category?.trim().toLowerCase() === String(id).toLowerCase()
+  );
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
       <Text fontSize={28} fontWeight="700" marginBottom={16}>
-        Recipes in {category}
+        Recipes in {id}
       </Text>
 
       <YStack space="$3">
