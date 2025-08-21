@@ -46,7 +46,9 @@ async function main() {
   const app = express();
 
   // Parse JSON bodies BEFORE routes
-  app.use(express.json());
+app.use(express.json({ limit: "10mb" })); // or higher if needed
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
 
   // REST Notes routes with auth
   app.use("/api/notes", authMiddleware, notesRoutes);

@@ -12,6 +12,9 @@ const recipeTypeDefs = gql`
     title: String!
     ingredients: [String!]!
     instructions: String!
+    category: String
+    image: String
+    notes: [String]
     user: User!
     createdAt: String!
     updatedAt: String!
@@ -23,7 +26,26 @@ const recipeTypeDefs = gql`
   }
 
   type Mutation {
-    createRecipe(title: String!, ingredients: [String!]!, instructions: String!): Recipe!
+    createRecipe(
+      title: String!
+      ingredients: [String!]!
+      instructions: String!
+      category: String
+      image: String
+      notes: [String]
+    ): Recipe!
+
+    updateRecipe(
+      id: ID!
+      title: String
+      ingredients: [String!]
+      instructions: String
+      category: String
+      image: String
+      notes: [String]
+    ): Recipe!
+
+    deleteRecipe(id: ID!): Recipe!
   }
 `;
 
