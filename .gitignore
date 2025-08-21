@@ -10,6 +10,7 @@ backend/build/
 # OS-specific
 .DS_Store
 Thumbs.db
+frontend/.env
 
 # React Native (frontend)
 node_modules/
