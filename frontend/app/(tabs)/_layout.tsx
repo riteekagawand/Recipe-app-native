@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import { Home, Grid, User, MessageSquare } from "@tamagui/lucide-icons";
 import { HapticTab } from '@/components/HapticTab';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 
@@ -78,14 +78,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="bookmark"
-        options={{
-          title: 'Bookmarks',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bookmark-outline" size={size} color={color} />
-          ),
-        }}
-      />
+  name="aiChat"
+  options={{
+    title: "AI Chat",
+    tabBarIcon: ({ color }) => <MessageSquare color={color} />, // ✅ works
+  }}
+/>
+
       <Tabs.Screen
         name="profile"
         options={{

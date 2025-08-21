@@ -73,9 +73,9 @@ app.use(express.urlencoded({ limit: "10mb", extended: true }));
     })
   );
 
-  app.listen(4000, () =>
-    console.log("🚀 Server running at http://localhost:4000/graphql")
-  );
+  app.listen(4000, '0.0.0.0', () =>
+  console.log("🚀 Server running at http://172.16.10.221:4000/graphql")
+);
 }
 
 main().catch((err) => console.error(err));

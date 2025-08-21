@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { ScrollView, Pressable } from "react-native";
-import { YStack, XStack, Text, Card, Image } from "tamagui";
+import { YStack, Text, Card, Image } from "tamagui";
 import { useQuery, gql } from "@apollo/client";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 
-// GraphQL query to get all recipes
+// GraphQL query
 const GET_RECIPES = gql`
   query GetRecipes {
     recipes {
@@ -22,10 +22,9 @@ const GET_RECIPES = gql`
 `;
 
 export default function CategoriesScreen() {
-  const navigation = useNavigation();
   const { loading, error, data } = useQuery(GET_RECIPES);
 
-  // Generate categories dynamically from recipes
+  // Group recipes by category
   const categories = useMemo(() => {
     if (!data?.recipes) return [];
     const map: Record<string, any[]> = {};
@@ -35,16 +34,17 @@ export default function CategoriesScreen() {
         map[recipe.category].push(recipe);
       }
     });
-    // Convert to array of objects with count and thumbnail
     return Object.entries(map).map(([name, recipes]) => ({
       name,
       count: recipes.length,
-      thumbnail: recipes[recipes.length - 1]?.image || "https://via.placeholder.com/150",
+      thumbnail:
+        recipes[recipes.length - 1]?.image ||
+        "https://via.placeholder.com/150",
     }));
   }, [data]);
 
-  if (loading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error: {error.message}</Text>;
+  if (loading) return <Text fontSize={16}>Loading...</Text>;
+  if (error) return <Text fontSize={16} color="red">Error: {error.message}</Text>;
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -52,25 +52,36 @@ export default function CategoriesScreen() {
         Categories
       </Text>
 
-      <YStack space="$3">
+      <YStack space={12}>
         {categories.map((category) => (
           <Pressable
             key={category.name}
             onPress={() =>
-              navigation.navigate("CategoryRecipes", { category: category.name })
+              router.push(
+                `/category/${encodeURIComponent(
+                  category.name.trim().toLowerCase()
+                )}`
+              )
             }
           >
-            <Card elevation={3} bordered borderRadius="$8" overflow="hidden">
+            <Card
+              elevation={3}
+              bordered={true}
+              borderRadius={8}
+              overflow="hidden"
+              marginBottom={12}
+            >
               <Image
                 source={{ uri: category.thumbnail }}
                 height={120}
                 width="100%"
+                resizeMode="cover"
               />
-              <YStack padding="$3">
-                <Text fontSize="$5" fontWeight="700">
+              <YStack padding={12}>
+                <Text fontSize={18} fontWeight="700">
                   {category.name}
                 </Text>
-                <Text fontSize="$3" color="$gray10">
+                <Text fontSize={14} color="#666">
                   {category.count} recipe{category.count > 1 ? "s" : ""}
                 </Text>
               </YStack>

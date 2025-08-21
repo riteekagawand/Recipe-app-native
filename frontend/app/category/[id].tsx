@@ -1,11 +1,10 @@
 import React from "react";
 import { ScrollView, Pressable } from "react-native";
 import { YStack, Text, Card, Image, XStack } from "tamagui";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useLocalSearchParams, router } from "expo-router";
 import { useQuery, gql } from "@apollo/client";
 import { Clock } from "@tamagui/lucide-icons";
 
-// GraphQL query to fetch all recipes
 const GET_RECIPES_BY_CATEGORY = gql`
   query GetRecipes {
     recipes {
@@ -23,15 +22,12 @@ const GET_RECIPES_BY_CATEGORY = gql`
 `;
 
 export default function CategoryRecipesScreen() {
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { category } = route.params as { category: string };
+  const { category } = useLocalSearchParams(); // ✅ must match [category].tsx
   const { loading, error, data } = useQuery(GET_RECIPES_BY_CATEGORY);
 
   if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
 
-  // Filter recipes by selected category
   const recipes = data.recipes.filter((r: any) => r.category === category);
 
   return (
@@ -41,12 +37,14 @@ export default function CategoryRecipesScreen() {
       </Text>
 
       <YStack space="$3">
+        {recipes.length === 0 && (
+          <Text color="$gray10">No recipes found in this category.</Text>
+        )}
+
         {recipes.map((recipe: any) => (
           <Pressable
             key={recipe._id}
-            onPress={() =>
-              navigation.navigate("recipe/[id]", { id: recipe._id })
-            }
+            onPress={() => router.push(`/recipe/${recipe._id}`)}
           >
             <Card elevation={3} bordered borderRadius="$8" overflow="hidden">
               <Image
